@@ -1,10 +1,19 @@
 #!/usr/bin/env python3
 
 from file_io import file_reader
+from file_io import csv_writer
+import sys
 
-Data = file_reader.FileReader("examples/wikipedia.csv")
-AllData = Data.extractdata("examples/wikipedia.csv")
+# Input and output file names
+InFile = "examples/wikipedia.csv"
+#InFile = sys.argv[1]
+InFileName = InFile.split('\\').pop().split('/').pop().rsplit('.', 1)[0]
 
+Data = file_reader.FileReader(InFile)
+AllData = Data.extractdata(InFile)
+#################################################################################################################################################
+###   Definition of useful functions to be used later
+#################################################################################################################################################
 
 # --------------------------------------------------------------- #
 # Define a function to convert the csv data to nodes structure    #
@@ -13,19 +22,42 @@ AllData = Data.extractdata("examples/wikipedia.csv")
 def data_to_nodes(list_of_all_data):
     node_list = []
     for item in list_of_all_data:
-        sublist = [item[0], item[1]]  # Append the node id and timestamp to the sublist
-        identifier_list = []  # This list will contain all the identifiers
-        identifiers = item[2].split(",")
-        for identifier in identifiers:
-            identifier_list.append(identifier)
-        sublist.append(identifier_list)  # Append all the identifiers to sublist as a list
-        node_list.append(sublist)
+        if item[2] != "":
+            sublist = [item[0], item[1]] # Append the node id and timestamp to sublist if the identifiers is not empty
+            identifier_list = []  # This list will contain all the identifiers
+            identifiers = item[2].split(",")
+            for identifier in identifiers:
+                identifier_list.append(identifier)
+            sublist.append(identifier_list)  # Append all the identifiers to sublist as a list
+            node_list.append(sublist)
     return node_list
 # ----------------------- End of Function ----------------------- #
 
+# ------------------------------------------------------------------ #
+# Define a function to convert the nodes list to csv desired format  #
+# ------------------------------------------------------------------ #
+# ---------------------- Start of Function ---------------------- #
+def nodes_to_formatted_nodes(list_of_nodes):
+    formatted_nodes = []
+    for item in list_of_nodes:
+        sublist = []
+        sublist.append(item[0])
+        sublist.append(item[1])
+        sublist.append(','.join(map(str, item[2])))
+        formatted_nodes.append(sublist)
+    return formatted_nodes
+# ----------------------- End of Function ----------------------- #
+#################################################################################################################################################
+
 # Creation of nodes by calling the function defined above
 nodes = data_to_nodes(AllData)
-for a in nodes:
+
+# Formatting the nodes to make suitable for writing to desired csv file
+nodes_formatted = nodes_to_formatted_nodes(nodes)
+
+# Write nodes to a csv file
+csv_writer.FileWriter.writeCSV(csv_writer,nodes_formatted,'output_files/'+InFileName+'-nodes.csv')
+for a in nodes_formatted:
     print(a)
 
 # Creation of Links between nodes. links is the list containing the links
@@ -38,8 +70,8 @@ for ii, elem in enumerate(nodes[:-1]): # -1 is for keeping the elements to the s
 
 print('#################################################################################################################################################')
 
-for b in links:
-    print(b)
+#for b in links:
+#    print(b)
 
 
 print('#################################################################################################################################################')
@@ -61,10 +93,7 @@ for elements in nodes:
             unique.append(item)
 print(roots)'''
 
-
-
-
-print(roots)
+#print(roots)
 print('#################################################################################################################################################')
 
 
